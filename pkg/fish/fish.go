@@ -108,40 +108,6 @@ func Base64Decode(src []byte) ([]byte, error) {
 			z := w >> ((3 - i) * 8)
 			buf[j] = byte(z)
 		}
-
-		//for i := uint8(0); i < 6; i, k = i+1, k+1 {
-		//	v := bytes.IndexByte(charset, src[k])
-		//	right |= v << (i * 6)
-		//}
-		//for i := uint8(0); i < 6; i, k = i+1, k+1 {
-		//	v := bytes.IndexByte(charset, src[k])
-		//	left |= v << (i * 6)
-		//}
-		//for i := uint8(0); i < 4; i, j = i+1, j+1 {
-		//	w := left & (0xFF << ((3 - i) * 8))
-		//	z := w >> ((3 - i) * 8)
-		//	buf[j] = byte(z)
-		//}
-		//for i := uint8(0); i < 4; i, j = i+1, j+1 {
-		//	w := right & (0xFF << ((3 - i) * 8))
-		//	z := w >> ((3 - i) * 8)
-		//	buf[j] = byte(z)
-		//}
-
-		//for i := uint8(0); i < 6; i, k = i+1, k+1 {
-		//	v := bytes.IndexByte(charset, src[k])
-		//	left |= v << (i * 6)
-		//}
-		//for i := uint8(0); i < 4; i, j = i+1, j+1 {
-		//	w := left & (0xFF << ((3 - i) * 8))
-		//	z := w >> ((3 - i) * 8)
-		//	buf[j] = byte(z)
-		//}
-		//for i := uint8(0); i < 4; i, j = i+1, j+1 {
-		//	w := right & (0xFF << ((3 - i) * 8))
-		//	z := w >> ((3 - 1) * 8)
-		//	buf[j] = byte(z)
-		//}
 	}
 	return buf, nil
 }
@@ -152,6 +118,16 @@ func Encrypt(key string, message string) (string, error) {
 		return "", err
 	}
 	return "+OK " + Base64Encode(encr), nil
+}
+
+// 针对密码加密
+
+func PdEncrypt(key string, password string) (string, error) {
+	enc, err := BlowFishEncrypt(key, Pad([]byte(password), 8))
+	if err != nil {
+		return "", err
+	}
+	return "+OK " + Base64Encode(enc), nil
 }
 
 func IsEncrypted(s string) bool {
@@ -168,6 +144,26 @@ func Decrypt(key string, message string) (string, error) {
 		return message, nil
 	}
 	b, err := Base64Decode([]byte(message))
+	if err != nil {
+		return "", err
+	}
+	dec, err := BlowFishDecrypt(key, b)
+	if err != nil {
+		return "", err
+	}
+	return string(dec), nil
+}
+
+func PdDecrypt(key string, password string) (string, error) {
+
+	if strings.HasPrefix(password, "+OK ") {
+		password = password[4:]
+	} else if strings.HasPrefix(password, "mcps ") {
+		password = password[5:]
+	} else {
+		return password, nil
+	}
+	b, err := Base64Decode([]byte(password))
 	if err != nil {
 		return "", err
 	}
