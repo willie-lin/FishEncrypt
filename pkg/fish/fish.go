@@ -7,20 +7,20 @@ import (
 	"strings"
 )
 
-func Pad(src []byte, mod int) []byte  {
+func Pad(src []byte, mod int) []byte {
 	remainder := len(src) % mod
 	if remainder != 0 {
-		return  append(src, bytes.Repeat([]byte{0}, mod-remainder)...)
+		return append(src, bytes.Repeat([]byte{0}, mod-remainder)...)
 	}
 	return src
 }
 
-func BlowFishEncrypt(key string, src []byte) ([]byte, error)  {
+func BlowFishEncrypt(key string, src []byte) ([]byte, error) {
 	cipher, err := blowfish.NewCipher([]byte(key))
 	if err != nil {
 		return nil, err
 	}
-	const bs  =  blowfish.BlockSize
+	const bs = blowfish.BlockSize
 	dst := make([]byte, len(src))
 	for i := 0; i < len(src); i += bs {
 		cipher.Encrypt(dst[i:i+bs], src[i:i+bs])
@@ -44,8 +44,8 @@ func BlowFishDecrypt(key string, src []byte) ([]byte, error) {
 
 }
 
-func Base64Encode(src []byte) string  {
-	charset :=  "./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+func Base64Encode(src []byte) string {
+	charset := "./0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	//确保 src 为8的倍数
 	src = Pad(src, 8)
@@ -54,17 +54,17 @@ func Base64Encode(src []byte) string  {
 	right := 0
 
 	for j, k := 0, 0; k < len(src); {
-		for i := 24; i >= 0; i, k = i - 8, k + 1 {
+		for i := 24; i >= 0; i, k = i-8, k+1 {
 			left += int(src[k]) << uint8(i)
 		}
-		for i := 24; i >= 0; i, k = i - 8, k + 1 {
+		for i := 24; i >= 0; i, k = i-8, k+1 {
 			right += int(src[k]) << uint8(i)
 		}
-		for i := 0; i < 6; i, j = i + 1, j + 1 {
+		for i := 0; i < 6; i, j = i+1, j+1 {
 			buf[j] = charset[right&0x3F]
 			right >>= 6
 		}
-		for i := 0; i < 6; i, j = i + 1, j + 1 {
+		for i := 0; i < 6; i, j = i+1, j+1 {
 			buf[j] = charset[left&0x3F]
 			left >>= 6
 		}
@@ -74,8 +74,8 @@ func Base64Encode(src []byte) string  {
 
 }
 
-func Base64Decode(src []byte)  ([]byte, error) {
-	
+func Base64Decode(src []byte) ([]byte, error) {
+
 	if len(src) > 0 && len(src) < 12 {
 		return nil, fmt.Errorf("invalid base64 input: %s", src)
 	}
@@ -128,8 +128,6 @@ func Base64Decode(src []byte)  ([]byte, error) {
 		//	buf[j] = byte(z)
 		//}
 
-
-
 		//for i := uint8(0); i < 6; i, k = i+1, k+1 {
 		//	v := bytes.IndexByte(charset, src[k])
 		//	left |= v << (i * 6)
@@ -148,20 +146,19 @@ func Base64Decode(src []byte)  ([]byte, error) {
 	return buf, nil
 }
 
-
-func Encrypt(key string, message string) (string, error)  {
+func Encrypt(key string, message string) (string, error) {
 	encr, err := BlowFishEncrypt(key, Pad([]byte(message), 8))
-	if err != nil{
+	if err != nil {
 		return "", err
 	}
 	return "+OK " + Base64Encode(encr), nil
 }
 
-func IsEncrypted(s string) bool  {
+func IsEncrypted(s string) bool {
 	return strings.HasPrefix(s, "+OK ") || strings.HasPrefix(s, "mcps ")
 }
 
-func  Decrypt(key string, message string) (string, error)  {
+func Decrypt(key string, message string) (string, error) {
 
 	if strings.HasPrefix(message, "+OK ") {
 		message = message[4:]
@@ -180,4 +177,3 @@ func  Decrypt(key string, message string) (string, error)  {
 	}
 	return string(dec), nil
 }
-

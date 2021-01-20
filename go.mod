@@ -1,4 +1,4 @@
-module FishEncrypt
+module github.com/willie-lin/FishEncrypt
 
 go 1.15
 

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"FishEncrypt/pkg/fish"
+	"github.com/willie-lin/FishEncrypt/pkg/fish"
 	"log"
 )
+
 func main() {
 
 	key := "secret key"
@@ -20,5 +21,5 @@ func main() {
 		log.Fatalf("Failed to decrypt: %s", err)
 	}
 	log.Printf("Decrypted: %s => %s", enc, dec)
-	
+
 }
